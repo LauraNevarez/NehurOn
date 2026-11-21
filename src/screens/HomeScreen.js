@@ -379,7 +379,7 @@ export default function HomeScreen({navigation}) {
             </View>
 
             <Text style={styles.modalSubtitle}>
-              Datos sincronizados con MongoDB ({userEmail || 'tester@neuron.com'})
+              Datos sincronizados con MongoDB ({userEmail || 'tester@nehuron.com'})
             </Text>
 
             <View style={styles.progressRow}>

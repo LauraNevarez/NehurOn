@@ -35,7 +35,7 @@ export default function LoginScreen({navigation}) {
   // Acceso inmediato en Modo Local para probar la app sin depender del servidor
   const enterLocalMode = (customEmail = null, customName = null, customAge = null) => {
     loginSuccess({
-      email: customEmail || (email.trim() ? email.trim().toLowerCase() : 'tester@neuron.com'),
+      email: customEmail || (email.trim() ? email.trim().toLowerCase() : 'tester@nehuron.com'),
       userName: customName || (userName.trim() ? userName.trim() : 'Tester NehurOn'),
       age: customAge || (age.trim() ? Number(age.trim()) : 22),
       points: 1000,
@@ -191,7 +191,7 @@ export default function LoginScreen({navigation}) {
 
   const fillTesterCredentials = () => {
     setIsRegisterMode(false);
-    setEmail('tester@neuron.com');
+    setEmail('tester@nehuron.com');
     setPassword('tester123');
   };
 
@@ -413,7 +413,7 @@ export default function LoginScreen({navigation}) {
                 onPress={fillTesterCredentials}>
                 <Icon name="shield-check-outline" size={16} color={colors.primary} />
                 <Text style={styles.testerChipText}>
-                  Usar Tester: tester@neuron.com
+                  Usar Tester: tester@nehuron.com
                 </Text>
               </Pressable>
             )}

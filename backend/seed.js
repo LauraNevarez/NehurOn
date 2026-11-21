@@ -13,7 +13,7 @@ async function runSeed() {
     await mongoose.connect(MONGO_URI);
     console.log('✅ Conexión establecida con MongoDB Atlas');
 
-    const testerEmail = 'tester@neuron.com';
+    const testerEmail = 'tester@nehuron.com';
     const testerPass = 'tester123';
 
     // Generar hash de contraseña
