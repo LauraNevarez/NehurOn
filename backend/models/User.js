@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema(
       default: 'Amigo',
       trim: true,
     },
+    age: {
+      type: Number,
+      default: null,
+    },
   },
   {
     timestamps: true,

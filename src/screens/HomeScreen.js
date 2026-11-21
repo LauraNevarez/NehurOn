@@ -7,6 +7,7 @@ import CustomButton from '../components/CustomButton';
 import useUserStore from '../store/useUserStore';
 import useActivityStore from '../store/useActivityStore';
 import useEssentialMode from '../hooks/useEssentialMode';
+import BlockerNative from '../modules/BlockerNativeModule';
 import {
   getNextActivity,
   getGoalDurationMinutes,
@@ -52,6 +53,18 @@ export default function HomeScreen({navigation}) {
 
   // Evitar disparos repetidos del cambio de fase
   const handlingPhaseChange = useRef(false);
+
+  // ── Limpieza defensiva de sesiones zombi tras días de inactividad ─────────
+  useEffect(() => {
+    const {isEssentialModeActive: active, sessionStartedAt, totalDurationMinutes: totMin, stopEssentialMode: stopStore} = useUserStore.getState();
+    if (active && sessionStartedAt) {
+      const elapsedHours = (Date.now() - sessionStartedAt) / (1000 * 60 * 60);
+      if (elapsedHours > 6) {
+        BlockerNative.stopBlocking();
+        stopStore(false);
+      }
+    }
+  }, []);
 
   // ── Temporizador en tiempo real ──────────────────────────────────────────
   useEffect(() => {

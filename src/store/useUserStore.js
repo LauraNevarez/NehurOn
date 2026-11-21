@@ -8,15 +8,18 @@ import {apiSyncProgress} from '../services/api';
 // Helper de sincronización no bloqueante con MongoDB Atlas
 const syncWithBackend = state => {
   if (!state.userEmail) return;
+  const equipped = state.equipped || {};
   apiSyncProgress({
     email: state.userEmail,
+    age: state.userAge,
     points: state.points,
     streakDays: state.streakDays,
     focusHours: state.focusHours,
     lastActiveDate: state.lastActiveDate,
     unlockedItems: state.unlockedItems,
-    equippedHat: state.equippedHat,
-    equippedGlasses: state.equippedGlasses,
+    equipped: equipped,
+    equippedHat: equipped.hat || state.equippedHat || null,
+    equippedGlasses: equipped.glasses || state.equippedGlasses || null,
   }).catch(() => {
     // Si el backend local no está corriendo, los datos persisten seguros en MMKV local
   });
@@ -28,6 +31,7 @@ const initialState = {
   userEmail: null,
   hasOnboarded: true,
   userName: 'Explorador',
+  userAge: null,
   points: 100,
   streakDays: 0,
   lastActiveDate: null,
@@ -48,6 +52,11 @@ const initialState = {
 
   blockedApps: DEFAULT_BLOCKED_APPS.map(a => a.pkg),
   unlockedItems: ['hat_gorra'],
+  // Estructura generalizada de accesorios: { [categoría]: idAccesorio }
+  equipped: {
+    hat: 'hat_gorra',
+    glasses: null,
+  },
   equippedGlasses: null,
   equippedHat: 'hat_gorra',
 };
@@ -58,21 +67,33 @@ const useUserStore = create(
       ...initialState,
 
       setUserName: userName => set({userName}),
+      setUserAge: userAge => set({userAge}),
       completeOnboarding: () => set({hasOnboarded: true}),
       addPoints: n => set(s => ({points: s.points + n})),
 
       loginSuccess: userData =>
-        set(s => ({
-          isAuthenticated: true,
-          userEmail: userData.email,
-          userName: userData.userName || s.userName,
-          points: userData.points !== undefined ? userData.points : s.points,
-          streakDays: userData.streakDays !== undefined ? userData.streakDays : s.streakDays,
-          focusHours: userData.focusHours !== undefined ? userData.focusHours : s.focusHours,
-          unlockedItems: userData.unlockedItems || s.unlockedItems,
-          equippedHat: userData.equippedHat !== undefined ? userData.equippedHat : s.equippedHat,
-          equippedGlasses: userData.equippedGlasses !== undefined ? userData.equippedGlasses : s.equippedGlasses,
-        })),
+        set(s => {
+          let equipped = userData.equipped;
+          if (!equipped || typeof equipped !== 'object') {
+            equipped = {
+              hat: userData.equippedHat !== undefined ? userData.equippedHat : s.equippedHat,
+              glasses: userData.equippedGlasses !== undefined ? userData.equippedGlasses : s.equippedGlasses,
+            };
+          }
+          return {
+            isAuthenticated: true,
+            userEmail: userData.email,
+            userName: userData.userName || s.userName,
+            userAge: userData.age !== undefined ? userData.age : s.userAge,
+            points: userData.points !== undefined ? userData.points : s.points,
+            streakDays: userData.streakDays !== undefined ? userData.streakDays : s.streakDays,
+            focusHours: userData.focusHours !== undefined ? userData.focusHours : s.focusHours,
+            unlockedItems: userData.unlockedItems || s.unlockedItems,
+            equipped: equipped,
+            equippedHat: equipped.hat || null,
+            equippedGlasses: equipped.glasses || null,
+          };
+        }),
 
       logout: () => set({isAuthenticated: false}),
 
@@ -210,7 +231,7 @@ const useUserStore = create(
         };
       },
 
-      // ---- Armario ----
+      // ---- Armario con soporte generalizado para cualquier categoría ----
       purchaseOrToggle: item => {
         const s = get();
         const owned = s.unlockedItems.includes(item.id);
@@ -222,11 +243,21 @@ const useUserStore = create(
           set({points: s.points - item.price, unlockedItems: [...s.unlockedItems, item.id]});
         }
 
-        const key = item.category === 'hat' ? 'equippedHat' : 'equippedGlasses';
-        const isEquipped = get()[key] === item.id;
-        set({[key]: owned && isEquipped ? null : item.id});
+        const category = item.category || 'hat';
+        const currentEquipped = s.equipped || {};
+        const isCurrentlyEquipped = currentEquipped[category] === item.id;
+        const newEquipped = {
+          ...currentEquipped,
+          [category]: isCurrentlyEquipped ? null : item.id,
+        };
+
+        set({
+          equipped: newEquipped,
+          equippedHat: newEquipped.hat || null,
+          equippedGlasses: newEquipped.glasses || null,
+        });
         syncWithBackend(get());
-        return {ok: true, bought: !owned, equipped: !(owned && isEquipped)};
+        return {ok: true, bought: !owned, equipped: !isCurrentlyEquipped};
       },
 
       resetAll: () => set({...initialState}),

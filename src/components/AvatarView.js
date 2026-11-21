@@ -17,13 +17,16 @@ import {ACCESSORY_SVGS} from '../assets/mascota/accessories';
  */
 export default function AvatarView({
   size = 220,
+  equipped,
   hatId,
   glassesId,
   showBackground = false,
   style,
 }) {
-  const hatXml = hatId ? ACCESSORY_SVGS[hatId] : null;
-  const glassesXml = glassesId ? ACCESSORY_SVGS[glassesId] : null;
+  const effectiveHat = equipped?.hat || equipped?.head || hatId || null;
+  const effectiveGlasses = equipped?.glasses || equipped?.eyes || glassesId || null;
+  const hatXml = effectiveHat ? ACCESSORY_SVGS[effectiveHat] : null;
+  const glassesXml = effectiveGlasses ? ACCESSORY_SVGS[effectiveGlasses] : null;
 
   return (
     <View

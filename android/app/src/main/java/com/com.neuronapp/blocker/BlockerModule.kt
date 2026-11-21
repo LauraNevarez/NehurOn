@@ -87,29 +87,24 @@ class BlockerModule(private val ctx: ReactApplicationContext) : ReactContextBase
     @ReactMethod
     fun isAccessibilityEnabled(promise: Promise) {
         try {
+            // 1. Verificación primaria: Si la instancia del servicio está conectada y viva
+            if (BlockerAccessibilityService.isRunning && BlockerAccessibilityService.activeInstance != null) {
+                promise.resolve(true)
+                return
+            }
+
+            // 2. Verificación secundaria: El AccessibilityManager de Android lo reporta habilitado y activo
             val am = ctx.getSystemService(Context.ACCESSIBILITY_SERVICE) as? AccessibilityManager
             val enabledServices = am?.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK) ?: emptyList()
             val me = BlockerAccessibilityService::class.java.name
 
             val isEnabledByManager = enabledServices.any {
-                it.resolveInfo.serviceInfo.packageName == ctx.packageName &&
-                it.resolveInfo.serviceInfo.name == me
+                it.resolveInfo?.serviceInfo?.packageName == ctx.packageName &&
+                it.resolveInfo?.serviceInfo?.name == me
             }
 
-            if (isEnabledByManager) {
-                promise.resolve(true)
-                return
-            }
-
-            val enabled = Settings.Secure.getString(
-                ctx.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-            ) ?: ""
-            val expectedLong = "${ctx.packageName}/$me"
-            val expectedShort = "${ctx.packageName}/.blocker.BlockerAccessibilityService"
-            val isEnabledBySettings = enabled.split(':').any {
-                it.equals(expectedLong, ignoreCase = true) || it.equals(expectedShort, ignoreCase = true)
-            }
-            promise.resolve(isEnabledBySettings)
+            // Si no está corriendo en el Manager ni en la instancia activa, el servicio fue hibernado/matado por Android
+            promise.resolve(isEnabledByManager)
         } catch (e: Exception) {
             promise.reject("ERR_A11Y", e)
         }

@@ -25,6 +25,7 @@ async function runSeed() {
     if (user) {
       user.password = hashedPassword;
       user.userName = 'Tester NehurOn';
+      user.age = 22;
       await user.save();
       console.log('👤 [users] Documento actualizado para:', testerEmail);
     } else {
@@ -32,6 +33,7 @@ async function runSeed() {
         email: testerEmail,
         password: hashedPassword,
         userName: 'Tester NehurOn',
+        age: 22,
       });
       await user.save();
       console.log('👤 [users] Documento creado para:', testerEmail);
@@ -58,20 +60,24 @@ async function runSeed() {
       console.log('🪙 [progress] Documento creado para userId:', user._id);
     }
 
-    // 3. Colección 'customizations' (Inventario y Accesorios Mascota)
+    // 3. Colección 'customizations' (Inventario y Accesorios Mascota dinámicos)
     let customization = await Customization.findOne({userId: user._id});
     if (customization) {
       customization.unlockedItems = ['hat_gorra', 'hat_birrete', 'gl_pixel', 'gl_sol'];
-      customization.equippedHat = 'hat_gorra';
-      customization.equippedGlasses = 'gl_pixel';
+      customization.equipped = {
+        hat: 'hat_gorra',
+        glasses: 'gl_pixel',
+      };
       await customization.save();
       console.log('🎩 [customizations] Documento actualizado para userId:', user._id);
     } else {
       customization = new Customization({
         userId: user._id,
         unlockedItems: ['hat_gorra', 'hat_birrete', 'gl_pixel', 'gl_sol'],
-        equippedHat: 'hat_gorra',
-        equippedGlasses: 'gl_pixel',
+        equipped: {
+          hat: 'hat_gorra',
+          glasses: 'gl_pixel',
+        },
       });
       await customization.save();
       console.log('🎩 [customizations] Documento creado para userId:', user._id);
@@ -79,9 +85,9 @@ async function runSeed() {
 
     console.log('====================================================');
     console.log('🎉 SEED COMPLETADO EN 3 COLECCIONES INDEPENDIENTES:');
-    console.log('  1. users:          Email, contraseña cifrada, nombre');
+    console.log('  1. users:          Email, contraseña cifrada, nombre, edad (22)');
     console.log('  2. progress:       9999 tokens/puntos, 5 racha, 12.5h');
-    console.log('  3. customizations: hat_gorra, hat_birrete, gl_pixel, gl_sol');
+    console.log('  3. customizations: equipped: { hat: hat_gorra, glasses: gl_pixel }');
     console.log('====================================================');
 
     await mongoose.disconnect();

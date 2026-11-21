@@ -22,6 +22,7 @@ import {colors, radius} from '../theme';
 export default function LoginScreen({navigation}) {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [userName, setUserName] = useState('');
+  const [age, setAge] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -32,14 +33,19 @@ export default function LoginScreen({navigation}) {
   const hasOnboarded = useUserStore(s => s.hasOnboarded);
 
   // Acceso inmediato en Modo Local para probar la app sin depender del servidor
-  const enterLocalMode = (customEmail = null, customName = null) => {
+  const enterLocalMode = (customEmail = null, customName = null, customAge = null) => {
     loginSuccess({
       email: customEmail || (email.trim() ? email.trim().toLowerCase() : 'tester@neuron.com'),
       userName: customName || (userName.trim() ? userName.trim() : 'Tester NehurOn'),
+      age: customAge || (age.trim() ? Number(age.trim()) : 22),
       points: 1000,
       streakDays: 1,
       focusHours: 1.0,
       unlockedItems: ['hat_gorra', 'hat_birrete', 'gl_pixel'],
+      equipped: {
+        hat: 'hat_gorra',
+        glasses: 'gl_pixel',
+      },
       equippedHat: 'hat_gorra',
       equippedGlasses: 'gl_pixel',
     });
@@ -98,11 +104,20 @@ export default function LoginScreen({navigation}) {
   const handleRegister = async () => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanName = userName.trim();
+    const cleanAge = age.trim();
 
-    if (!cleanName || !cleanEmail || !password.trim()) {
+    if (!cleanName || !cleanEmail || !password.trim() || !cleanAge) {
       return Alert.alert(
         'Campos requeridos',
-        'Por favor completa tu nombre, correo y contraseña.'
+        'Por favor completa tu nombre, edad, correo y contraseña.'
+      );
+    }
+
+    const parsedAge = parseInt(cleanAge, 10);
+    if (isNaN(parsedAge) || parsedAge < 5 || parsedAge > 120) {
+      return Alert.alert(
+        'Edad inválida',
+        'Por favor ingresa una edad válida en números (entre 5 y 120 años).'
       );
     }
 
@@ -130,7 +145,7 @@ export default function LoginScreen({navigation}) {
 
     setLoading(true);
     try {
-      const res = await apiRegister(cleanEmail, password, cleanName);
+      const res = await apiRegister(cleanEmail, password, cleanName, parsedAge);
 
       if (res.ok && res.data?.user) {
         loginSuccess(res.data.user);
@@ -153,10 +168,10 @@ export default function LoginScreen({navigation}) {
       } else {
         Alert.alert(
           'Servidor no disponible',
-          'El servidor en la PC no respondió. ¿Deseas entrar en Modo Local con estos datos para probar la app en tu teléfono?',
+          'El servidor en la nube o PC no respondió. ¿Deseas entrar en Modo Local con estos datos para probar la app en tu teléfono?',
           [
             {text: 'Cancelar', style: 'cancel'},
-            {text: 'Entrar en Modo Local', onPress: () => enterLocalMode(cleanEmail, cleanName)},
+            {text: 'Entrar en Modo Local', onPress: () => enterLocalMode(cleanEmail, cleanName, parsedAge)},
           ]
         );
       }
@@ -166,7 +181,7 @@ export default function LoginScreen({navigation}) {
         'No se pudo conectar con el servidor. ¿Deseas registrarte y entrar en Modo Local para probar la app?',
         [
           {text: 'Cancelar', style: 'cancel'},
-          {text: 'Entrar en Modo Local', onPress: () => enterLocalMode(cleanEmail, cleanName)},
+          {text: 'Entrar en Modo Local', onPress: () => enterLocalMode(cleanEmail, cleanName, parsedAge)},
         ]
       );
     } finally {
@@ -247,7 +262,7 @@ export default function LoginScreen({navigation}) {
             {/* Input Nombre de Usuario (Solo en Registro) */}
             {isRegisterMode && (
               <>
-                <Text style={styles.label}>Nombre de Usuario</Text>
+                <Text style={styles.label}>Nombre Completo</Text>
                 <View style={styles.inputWrapper}>
                   <Icon
                     name="account-outline"
@@ -262,6 +277,26 @@ export default function LoginScreen({navigation}) {
                     placeholder="Ej. Sofía Morales"
                     placeholderTextColor={colors.muted}
                     autoCapitalize="words"
+                  />
+                </View>
+
+                {/* Input Edad */}
+                <Text style={styles.label}>Edad (Años)</Text>
+                <View style={styles.inputWrapper}>
+                  <Icon
+                    name="calendar-account-outline"
+                    size={20}
+                    color={colors.muted}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    value={age}
+                    onChangeText={setAge}
+                    placeholder="Ej. 21"
+                    placeholderTextColor={colors.muted}
+                    keyboardType="numeric"
+                    maxLength={3}
                   />
                 </View>
               </>

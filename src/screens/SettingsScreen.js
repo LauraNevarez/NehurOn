@@ -16,6 +16,9 @@ export default function SettingsScreen({navigation}) {
   const logout = useUserStore(s => s.logout);
   const userName = useUserStore(s => s.userName);
   const setUserName = useUserStore(s => s.setUserName);
+  const userAge = useUserStore(s => s.userAge);
+  const setUserAge = useUserStore(s => s.setUserAge);
+  const equipped = useUserStore(s => s.equipped);
   const equippedHat = useUserStore(s => s.equippedHat);
   const equippedGlasses = useUserStore(s => s.equippedGlasses);
   const blockedApps = useUserStore(s => s.blockedApps);
@@ -74,7 +77,7 @@ export default function SettingsScreen({navigation}) {
         <Text style={styles.section}>Perfil</Text>
         <View style={styles.profileCard}>
           <View style={styles.avatarWrapper}>
-            <AvatarView size={95} hatId={equippedHat} glassesId={equippedGlasses} />
+            <AvatarView size={95} equipped={equipped} hatId={equippedHat} glassesId={equippedGlasses} />
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.profileLabel}>Nombre de usuario</Text>
@@ -85,6 +88,11 @@ export default function SettingsScreen({navigation}) {
               placeholder="Tu nombre"
               placeholderTextColor={colors.muted}
             />
+            {userEmail ? (
+              <Text style={[styles.profileLabel, {marginTop: 6}]}>
+                {userEmail} {userAge ? `· ${userAge} años` : ''}
+              </Text>
+            ) : null}
             <Pressable
               style={styles.closetLink}
               onPress={() => navigation.navigate('Armario')}

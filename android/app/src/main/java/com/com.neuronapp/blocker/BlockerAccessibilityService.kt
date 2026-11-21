@@ -20,6 +20,11 @@ import android.widget.TextView
  */
 class BlockerAccessibilityService : AccessibilityService() {
 
+    companion object {
+        @Volatile var isRunning: Boolean = false
+        @Volatile var activeInstance: BlockerAccessibilityService? = null
+    }
+
     private val wm by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val prefs by lazy { getSharedPreferences(BlockerModule.PREFS, Context.MODE_PRIVATE) }
     private var overlay: View? = null
@@ -37,7 +42,21 @@ class BlockerAccessibilityService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        isRunning = true
+        activeInstance = this
         runCatching { prefs.registerOnSharedPreferenceChangeListener(listener) }
+    }
+
+    override fun onUnbind(intent: android.content.Intent?): Boolean {
+        isRunning = false
+        activeInstance = null
+        return true // Permite que el sistema vuelva a vincular (onRebind) cuando sea necesario
+    }
+
+    override fun onRebind(intent: android.content.Intent?) {
+        super.onRebind(intent)
+        isRunning = true
+        activeInstance = this
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -152,6 +171,8 @@ class BlockerAccessibilityService : AccessibilityService() {
     override fun onInterrupt() = hideOverlay()
 
     override fun onDestroy() {
+        isRunning = false
+        activeInstance = null
         hideOverlay()
         runCatching { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
         super.onDestroy()

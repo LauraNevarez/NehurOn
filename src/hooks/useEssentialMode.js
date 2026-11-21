@@ -23,8 +23,8 @@ export default function useEssentialMode(navigation) {
     const ok = await BlockerNative.hasAllPermissions();
     if (!ok) {
       Alert.alert(
-        'Permisos necesarios',
-        'Para bloquear apps necesitamos el servicio de accesibilidad y el permiso de superposición.',
+        'Servicio de Bloqueo Inactivo',
+        'Android pausó el servicio de accesibilidad o falta el permiso de superposición (común si la app estuvo días sin usarse). Por favor reactívalo para comenzar a bloquear.',
         [
           {text: 'Cancelar', style: 'cancel'},
           {text: 'Configurar', onPress: () => navigation.navigate('Permissions')},

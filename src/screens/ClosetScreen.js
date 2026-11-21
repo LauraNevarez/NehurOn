@@ -17,6 +17,7 @@ const TABS = [
 export default function ClosetScreen() {
   const points = useUserStore(s => s.points);
   const unlockedItems = useUserStore(s => s.unlockedItems);
+  const equipped = useUserStore(s => s.equipped) || {};
   const equippedHat = useUserStore(s => s.equippedHat);
   const equippedGlasses = useUserStore(s => s.equippedGlasses);
   const purchaseOrToggle = useUserStore(s => s.purchaseOrToggle);
@@ -44,11 +45,11 @@ export default function ClosetScreen() {
 
   const renderItem = ({item}) => {
     const owned = unlockedItems.includes(item.id);
-    const equipped = equippedHat === item.id || equippedGlasses === item.id;
+    const isEquipped = equipped[item.category] === item.id || equippedHat === item.id || equippedGlasses === item.id;
     const svgXml = item.svgXml || ACCESSORY_SVGS[item.id];
 
     return (
-      <Pressable style={[styles.item, equipped && styles.itemOn]} onPress={() => onPressItem(item)}>
+      <Pressable style={[styles.item, isEquipped && styles.itemOn]} onPress={() => onPressItem(item)}>
         <View style={styles.itemImgBox}>
           {svgXml ? (
             <SvgXml xml={svgXml} width={64} height={64} />
@@ -57,7 +58,7 @@ export default function ClosetScreen() {
           )}
         </View>
         <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
-        {equipped ? (
+        {isEquipped ? (
           <Text style={[styles.tag, {color: colors.success}]}>Equipado</Text>
         ) : owned ? (
           <Text style={[styles.tag, {color: colors.muted}]}>Equipar</Text>
@@ -81,7 +82,7 @@ export default function ClosetScreen() {
       </View>
 
       <View style={styles.avatarBox}>
-        <AvatarView size={230} hatId={equippedHat} glassesId={equippedGlasses} />
+        <AvatarView size={230} equipped={equipped} hatId={equippedHat} glassesId={equippedGlasses} />
       </View>
 
       <View style={styles.tabs}>

@@ -91,12 +91,12 @@ export async function apiLogin(email, password) {
 }
 
 /**
- * Registra un nuevo usuario en MongoDB
+ * Registra un nuevo usuario en MongoDB (con nombre, edad y correo)
  */
-export async function apiRegister(email, password, userName) {
+export async function apiRegister(email, password, userName, age) {
   return await requestWithFallback('/api/auth/register', {
     method: 'POST',
-    body: JSON.stringify({email, password, userName}),
+    body: JSON.stringify({email, password, userName, age}),
   });
 }
 
