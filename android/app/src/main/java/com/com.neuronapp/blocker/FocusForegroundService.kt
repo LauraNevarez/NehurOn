@@ -19,7 +19,7 @@ class FocusForegroundService : Service() {
 
     companion object {
         const val CHANNEL_ID = "neuron_focus_foreground_channel"
-        const val CHANNEL_NAME = "Modo Enfoque NeurOn"
+        const val CHANNEL_NAME = "Modo Enfoque NehurOn"
         const val NOTIFICATION_ID = 40401
 
         const val ACTION_START = "com.neuronapp.blocker.ACTION_START"
@@ -126,7 +126,7 @@ class FocusForegroundService : Service() {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(if (iconRes != 0) iconRes else android.R.drawable.ic_lock_lock)
-            .setContentTitle("🛡️ NeurOn · Modo Enfoque Activo")
+            .setContentTitle("🛡️ NehurOn · Modo Enfoque Activo")
             .setContentText("Bloqueando aplicaciones de distracción en segundo plano.")
             .setContentIntent(pendingIntent)
             .setOngoing(true)
