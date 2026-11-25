@@ -4,6 +4,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import ActivityCard from '../components/ActivityCard';
 import CustomButton from '../components/CustomButton';
+import EarlyExitTriviaModal from '../components/EarlyExitTriviaModal';
 import useUserStore from '../store/useUserStore';
 import useActivityStore from '../store/useActivityStore';
 import useEssentialMode from '../hooks/useEssentialMode';
@@ -31,6 +32,7 @@ export default function HomeScreen({navigation}) {
   const points = useUserStore(s => s.points);
   const activities = useActivityStore(s => s.activities);
   const [showProgressModal, setShowProgressModal] = useState(false);
+  const [showTriviaModal, setShowTriviaModal] = useState(false);
 
   const {
     isActive,
@@ -287,7 +289,7 @@ export default function HomeScreen({navigation}) {
                   </Pressable>
                 ) : null}
 
-                <Pressable style={[styles.pomoBtn, styles.pomoStopBtn]} onPress={() => stop(false)}>
+                <Pressable style={[styles.pomoBtn, styles.pomoStopBtn]} onPress={() => setShowTriviaModal(true)}>
                   <Icon name="stop-circle-outline" size={18} color={colors.danger} />
                   <Text style={styles.pomoStopBtnText}>Terminar</Text>
                 </Pressable>
@@ -422,6 +424,15 @@ export default function HomeScreen({navigation}) {
           </View>
         </View>
       </Modal>
+
+      <EarlyExitTriviaModal
+        visible={showTriviaModal}
+        onCancel={() => setShowTriviaModal(false)}
+        onAllowExit={info => {
+          setShowTriviaModal(false);
+          stop(false, info);
+        }}
+      />
     </SafeAreaView>
   );
 }

@@ -43,9 +43,27 @@ export default function useEssentialMode(navigation) {
    * Termina la sesión (sea por tiempo completado o por botón manual).
    * Si la meta finalizó o fue cancelada, desbloquea las apps y solicita evidencias si aplica.
    */
-  const stop = useCallback(async (isAutoCompleted = false) => {
+  const stop = useCallback(async (isAutoCompleted = false, earlyExitInfo = null) => {
     await BlockerNative.stopBlocking();
-    const res = useUserStore.getState().stopEssentialMode(isAutoCompleted);
+    const forceNoReward = Boolean(earlyExitInfo);
+    const res = useUserStore.getState().stopEssentialMode(isAutoCompleted, forceNoReward);
+
+    if (earlyExitInfo) {
+      const {passed, totalLost} = earlyExitInfo;
+      if (passed) {
+        const lostNote = totalLost > 0 ? ` (Perdiste ${totalLost} tokens en intentos anteriores).` : '';
+        Alert.alert(
+          'Sesión terminada antes de tiempo',
+          `Respondiste correctamente y tus apps fueron desbloqueadas. No ganaste tokens porque no completaste la sesión${lostNote}`,
+        );
+      } else {
+        Alert.alert(
+          'Sesión terminada',
+          `Fallaste los 3 intentos del reto y perdiste ${totalLost} tokens en total. Tus apps fueron desbloqueadas.`,
+        );
+      }
+      return;
+    }
 
     const title = res.fullyCompleted ? '🎉 ¡Sesión completada!' : 'Sesión terminada';
     let rewardText = '';

@@ -71,6 +71,10 @@ const useUserStore = create(
       setUserAge: userAge => set({userAge}),
       completeOnboarding: () => set({hasOnboarded: true}),
       addPoints: n => set(s => ({points: s.points + n})),
+      deductPoints: n => {
+        set(s => ({points: Math.max(0, s.points - Math.abs(n))}));
+        syncWithBackend(get());
+      },
 
       loginSuccess: userData =>
         set(s => {
@@ -174,7 +178,7 @@ const useUserStore = create(
         return {done: false, remainingTotal, nextCycleMinutes: nextCycle};
       },
 
-      stopEssentialMode: (isCompleted = false) => {
+      stopEssentialMode: (isCompleted = false, forceNoReward = false) => {
         const s = get();
         // Minutos reales transcurridos de la sesión
         const realMinutes = s.sessionStartedAt
@@ -182,11 +186,10 @@ const useUserStore = create(
           : 0;
 
         // Se considera completada si se agotó el tiempo automáticamente o si el tiempo real transcurrido cubre la duración planeada
-        const fullyCompleted = isCompleted || realMinutes >= s.totalDurationMinutes;
+        const fullyCompleted = !forceNoReward && (isCompleted || realMinutes >= s.totalDurationMinutes);
 
-        // Regla estricta: Solo se otorga recompensa si la sesión duró AL MENOS 20 MINUTOS REALES
-        // Si el usuario cancela antes de tiempo sin haber cumplido al menos 20 min reales, NO hay puntos ni racha.
-        const givesReward = s.totalDurationMinutes >= 20 && (fullyCompleted || realMinutes >= 20);
+        // Regla estricta: Solo se otorga recompensa si no fue salida anticipada y duró AL MENOS 20 MINUTOS REALES
+        const givesReward = !forceNoReward && s.totalDurationMinutes >= 20 && (fullyCompleted || realMinutes >= 20);
 
         const today = dateKey();
         let streak = s.streakDays;
