@@ -8,6 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "sync-accessories": "node tools/sync-accessories.js",
+    "build-apk": "node tools/sync-accessories.js && npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res && cd android && gradlew.bat assembleRelease",
     "test": "jest"
   },
   "dependencies": {
