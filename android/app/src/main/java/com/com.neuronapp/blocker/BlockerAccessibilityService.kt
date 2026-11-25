@@ -5,14 +5,18 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.PixelFormat
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.neuronapp.R
 
 /**
  * Detecta la app en primer plano y, si el Modo Esencial
@@ -114,19 +118,29 @@ class BlockerAccessibilityService : AccessibilityService() {
                 setBackgroundColor(Color.parseColor("#F20F1020"))
                 setPadding((32 * dp).toInt(), 0, (32 * dp).toInt(), 0)
             }
-            root.addView(TextView(this).apply {
-                text = "🛡️"
-                textSize = 64f
-                gravity = Gravity.CENTER
-            })
+            val logoSize = (124 * dp).toInt()
+            val logoView = ImageView(this).apply {
+                setImageResource(R.mipmap.ic_launcher_round)
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(Color.parseColor("#F5B041"))
+                }
+                clipToOutline = true
+                layoutParams = LinearLayout.LayoutParams(logoSize, logoSize).apply {
+                    bottomMargin = (20 * dp).toInt()
+                }
+            }
+            root.addView(logoView)
             root.addView(TextView(this).apply {
                 text = "Modo Esencial · Enfoque"
                 setTextColor(Color.WHITE)
                 textSize = 24f
+                setTypeface(null, Typeface.BOLD)
                 gravity = Gravity.CENTER
             })
             root.addView(TextView(this).apply {
-                text = "Esta app está bloqueada durante tu tiempo de enfoque.\n¡Al completar tu sesión recibirás tus minutos de gracia!"
+                text = "Esta app está bloqueada durante tu tiempo de enfoque.\nAl completar tu sesión recibirás tus minutos de gracia (100pts)."
                 setTextColor(Color.parseColor("#9A9CC0"))
                 textSize = 15f
                 gravity = Gravity.CENTER
