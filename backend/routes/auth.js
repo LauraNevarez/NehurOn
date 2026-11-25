@@ -86,6 +86,10 @@ router.post('/login', async (req, res) => {
     }
 
     const equippedObj = getEquippedObject(customization);
+    const focusLogObj =
+      progress.focusLog instanceof Map
+        ? Object.fromEntries(progress.focusLog)
+        : progress.focusLog || {};
 
     // Datos ensamblados para enviar al cliente de la app
     const userData = {
@@ -98,6 +102,7 @@ router.post('/login', async (req, res) => {
       streakDays: progress.streakDays,
       focusHours: progress.focusHours,
       lastActiveDate: progress.lastActiveDate,
+      focusLog: focusLogObj,
       // Datos de personalización generalizados (dinámico por categoría/ranura)
       unlockedItems: customization.unlockedItems || [],
       equipped: equippedObj,
@@ -187,6 +192,8 @@ router.post('/register', async (req, res) => {
         points: newProgress.points,
         streakDays: newProgress.streakDays,
         focusHours: newProgress.focusHours,
+        lastActiveDate: null,
+        focusLog: {},
         unlockedItems: newCustomization.unlockedItems,
         equipped: equippedObj,
         equippedHat: equippedObj.hat || null,
@@ -216,6 +223,7 @@ router.put('/sync', async (req, res) => {
       streakDays,
       focusHours,
       lastActiveDate,
+      focusLog,
       unlockedItems,
       equipped,
       equippedHat,
@@ -243,6 +251,7 @@ router.put('/sync', async (req, res) => {
     if (streakDays !== undefined) progressUpdates.streakDays = streakDays;
     if (focusHours !== undefined) progressUpdates.focusHours = focusHours;
     if (lastActiveDate !== undefined) progressUpdates.lastActiveDate = lastActiveDate;
+    if (focusLog !== undefined && typeof focusLog === 'object') progressUpdates.focusLog = focusLog;
 
     if (Object.keys(progressUpdates).length > 0) {
       await Progress.findOneAndUpdate(

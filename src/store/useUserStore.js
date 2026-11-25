@@ -16,6 +16,7 @@ const syncWithBackend = state => {
     streakDays: state.streakDays,
     focusHours: state.focusHours,
     lastActiveDate: state.lastActiveDate,
+    focusLog: state.focusLog,
     unlockedItems: state.unlockedItems,
     equipped: equipped,
     equippedHat: equipped.hat || state.equippedHat || null,
@@ -76,26 +77,39 @@ const useUserStore = create(
           let equipped = userData.equipped;
           if (!equipped || typeof equipped !== 'object') {
             equipped = {
-              hat: userData.equippedHat !== undefined ? userData.equippedHat : s.equippedHat,
-              glasses: userData.equippedGlasses !== undefined ? userData.equippedGlasses : s.equippedGlasses,
+              hat: userData.equippedHat || null,
+              glasses: userData.equippedGlasses || null,
             };
           }
           return {
             isAuthenticated: true,
             userEmail: userData.email,
-            userName: userData.userName || s.userName,
-            userAge: userData.age !== undefined ? userData.age : s.userAge,
-            points: userData.points !== undefined ? userData.points : s.points,
-            streakDays: userData.streakDays !== undefined ? userData.streakDays : s.streakDays,
-            focusHours: userData.focusHours !== undefined ? userData.focusHours : s.focusHours,
-            unlockedItems: userData.unlockedItems || s.unlockedItems,
+            userName: userData.userName || 'Explorador',
+            userAge: userData.age !== undefined ? userData.age : null,
+            points: userData.points !== undefined ? userData.points : 0,
+            streakDays: userData.streakDays !== undefined ? userData.streakDays : 0,
+            focusHours: userData.focusHours !== undefined ? userData.focusHours : 0,
+            lastActiveDate: userData.lastActiveDate || null,
+            focusLog:
+              userData.focusLog && typeof userData.focusLog === 'object'
+                ? userData.focusLog
+                : {},
+            unlockedItems: Array.isArray(userData.unlockedItems)
+              ? userData.unlockedItems
+              : [],
             equipped: equipped,
             equippedHat: equipped.hat || null,
             equippedGlasses: equipped.glasses || null,
           };
         }),
 
-      logout: () => set({isAuthenticated: false}),
+      logout: () =>
+        set(s => ({
+          ...initialState,
+          hasOnboarded: s.hasOnboarded,
+          blockedApps: s.blockedApps,
+          isAuthenticated: false,
+        })),
 
       toggleBlockedApp: pkg =>
         set(s => ({
