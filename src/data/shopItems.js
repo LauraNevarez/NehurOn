@@ -1,81 +1,39 @@
-import {ACCESSORY_SVGS} from '../assets/mascota/accessories';
+import {ACCESSORY_SVGS, ACCESSORY_CATALOG} from '../assets/mascota/accessories';
 
 /**
- * Catálogo Oficial de Accesorios NehurOn (SVG nativos de 1024x1024)
- * Categorías:
- *  - 'hat': Sombreros, gorras, audífonos, accesorios de cabeza
- *  - 'glasses': Lentes, antifaces, mostacho, accesorios de rostro
+ * Catálogo Oficial de Accesorios NehurOn
+ * Generado automáticamente desde las carpetas:
+ *  - Cabeza/ ('hat')
+ *  - Ojos/   ('glasses')
+ *  - Boca/   ('mouth')
+ *
+ * Para agregar nuevos accesorios: solo coloca el .svg en la carpeta
+ * correspondiente y ejecuta "npm run sync-accessories".
  */
-export const SHOP_ITEMS = [
-  // --- Categoría: Sombreros y Accesorios de Cabeza ('hat') ---
-  {
-    id: 'hat_gorra',
-    category: 'hat',
-    name: 'Gorra NehurOn',
-    price: 200,
-    svgXml: ACCESSORY_SVGS.hat_gorra,
-  },
-  {
-    id: 'hat_sombrero',
-    category: 'hat',
-    name: 'Sombrero Clásico',
-    price: 300,
-    svgXml: ACCESSORY_SVGS.hat_sombrero,
-  },
-  {
-    id: 'hat_birrete',
-    category: 'hat',
-    name: 'Birrete de Graduado',
-    price: 400,
-    svgXml: ACCESSORY_SVGS.hat_birrete,
-  },
-  {
-    id: 'hat_audifonos',
-    category: 'hat',
-    name: 'Audífonos Gamer',
-    price: 350,
-    svgXml: ACCESSORY_SVGS.hat_audifonos,
-  },
-  {
-    id: 'hat_airpods',
-    category: 'hat',
-    name: 'AirPods Pro',
-    price: 250,
-    svgXml: ACCESSORY_SVGS.hat_airpods,
-  },
-
-  // --- Categoría: Lentes y Rostro ('glasses') ---
-  {
-    id: 'gl_clasicos',
-    category: 'glasses',
-    name: 'Lentes Intelectual',
-    price: 150,
-    svgXml: ACCESSORY_SVGS.gl_clasicos,
-  },
-  {
-    id: 'gl_sol',
-    category: 'glasses',
-    name: 'Lentes de Sol',
-    price: 300,
-    svgXml: ACCESSORY_SVGS.gl_sol,
-  },
-  {
-    id: 'gl_pixel',
-    category: 'glasses',
-    name: 'Lentes Pixel Thug',
-    price: 500,
-    svgXml: ACCESSORY_SVGS.gl_pixel,
-  },
-  {
-    id: 'gl_mostacho',
-    category: 'glasses',
-    name: 'Mostacho Distinguido',
-    price: 200,
-    svgXml: ACCESSORY_SVGS.gl_mostacho,
-  },
-];
+export const SHOP_ITEMS = ACCESSORY_CATALOG.map(item => ({
+  ...item,
+  svgXml: ACCESSORY_SVGS[item.id],
+}));
 
 export const getItem = id => SHOP_ITEMS.find(i => i.id === id) || null;
+
+/**
+ * Paleta de colores de fondo personalizables para el hurón NehurOn
+ */
+export const AVATAR_BG_COLORS = [
+  {id: 'transparent', name: 'Sin fondo', hex: 'transparent'},
+  {id: '#F9BA51', name: 'NehurOn', hex: '#F9BA51'},
+  {id: '#A7F3D0', name: 'Menta', hex: '#A7F3D0'},
+  {id: '#BAE6FD', name: 'Cielo', hex: '#BAE6FD'},
+  {id: '#DDD6FE', name: 'Lavanda', hex: '#DDD6FE'},
+  {id: '#FBCFE8', name: 'Rosa', hex: '#FBCFE8'},
+  {id: '#FED7AA', name: 'Durazno', hex: '#FED7AA'},
+  {id: '#FEF08A', name: 'Limón', hex: '#FEF08A'},
+  {id: '#0F766E', name: 'Bosque', hex: '#0F766E'},
+  {id: '#1E293B', name: 'Noche', hex: '#1E293B'},
+  {id: '#4C1D95', name: 'Galaxia', hex: '#4C1D95'},
+  {id: '#991B1B', name: 'Navidad', hex: '#991B1B'},
+];
 
 export const DEFAULT_BLOCKED_APPS = [
   {pkg: 'com.instagram.android', name: 'Instagram'},

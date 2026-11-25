@@ -4,17 +4,26 @@ import Svg, {G, Path} from 'react-native-svg';
 export default function NehurOnSvg({
   size = 200,
   showBackground = false,
+  backgroundColor = '#f9ba51',
   style,
 }) {
+  const hasBg =
+    showBackground ||
+    (backgroundColor && backgroundColor !== 'transparent' && backgroundColor !== 'none');
+  const fillBg =
+    backgroundColor && backgroundColor !== 'transparent' && backgroundColor !== 'none'
+      ? backgroundColor
+      : '#f9ba51';
+
   return (
     <Svg
       width={size}
       height={size}
       viewBox="0 0 1024 1024"
       style={style}>
-      {showBackground && (
+      {hasBg && (
         <G id="Layer_4">
-          <Path d="M0 0 L1024 0 L1024 1024 L0 1024 Z" fill="#f9ba51" />
+          <Path d="M0 0 L1024 0 L1024 1024 L0 1024 Z" fill={fillBg} />
         </G>
       )}
       <G id="Layer_5">

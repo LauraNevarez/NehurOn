@@ -6,27 +6,29 @@ import {ACCESSORY_SVGS} from '../assets/mascota/accessories';
 
 /**
  * Componente visual de la mascota NehurOn:
- * Renderiza la base del hurón en SVG y superpone capas vectoriales transparentes
- * para los accesorios desbloqueados o equipados.
- *
- * Como todos los SVGs comparten un viewBox nativo de 1024x1024:
- *  - Capa 1: Base SVG del hurón
- *  - Capa 2: Sombrero / Accesorio de cabeza ('hat')
- *  - Capa 3: Lentes / Accesorio de rostro ('glasses')
- * Se alinean perfectamente con exactitud de pixel sin requerir desfases manuales.
+ * Renderiza la base del hurón en SVG (con color de fondo personalizable) y
+ * superpone dinámicamente las capas vectoriales de Cabeza, Ojos y Boca.
  */
 export default function AvatarView({
   size = 220,
   equipped,
   hatId,
   glassesId,
+  mouthId,
+  bgColor,
   showBackground = false,
   style,
 }) {
   const effectiveHat = equipped?.hat || equipped?.head || hatId || null;
   const effectiveGlasses = equipped?.glasses || equipped?.eyes || glassesId || null;
+  const effectiveMouth = equipped?.mouth || equipped?.boca || mouthId || null;
+  const effectiveBg = bgColor || equipped?.bg || (showBackground ? '#F9BA51' : 'transparent');
+
   const hatXml = effectiveHat ? ACCESSORY_SVGS[effectiveHat] : null;
   const glassesXml = effectiveGlasses ? ACCESSORY_SVGS[effectiveGlasses] : null;
+  const mouthXml = effectiveMouth ? ACCESSORY_SVGS[effectiveMouth] : null;
+
+  const hasCustomBg = effectiveBg && effectiveBg !== 'transparent' && effectiveBg !== 'none';
 
   return (
     <View
@@ -36,27 +38,38 @@ export default function AvatarView({
           height: size,
           alignItems: 'center',
           justifyContent: 'center',
+          borderRadius: hasCustomBg ? Math.round(size * 0.14) : 0,
+          overflow: 'hidden',
+          backgroundColor: hasCustomBg ? effectiveBg : 'transparent',
         },
         style,
       ]}>
       {/* Capa 1: Base Hurón NehurOn SVG */}
       <NehurOnSvg
         size={size}
-        showBackground={showBackground}
+        showBackground={false}
+        backgroundColor="transparent"
         style={styles.baseSvg}
       />
 
-      {/* Capa 2: Accesorio de Cabeza / Sombrero */}
+      {/* Capa 2: Accesorio de Cabeza */}
       {hatXml && (
         <View pointerEvents="none" style={[styles.layer, styles.hatLayer]}>
           <SvgXml xml={hatXml} width={size} height={size} />
         </View>
       )}
 
-      {/* Capa 3: Accesorio de Rostro / Lentes */}
+      {/* Capa 3: Accesorio de Ojos / Lentes */}
       {glassesXml && (
         <View pointerEvents="none" style={[styles.layer, styles.glassesLayer]}>
           <SvgXml xml={glassesXml} width={size} height={size} />
+        </View>
+      )}
+
+      {/* Capa 4: Accesorio de Boca */}
+      {mouthXml && (
+        <View pointerEvents="none" style={[styles.layer, styles.mouthLayer]}>
+          <SvgXml xml={mouthXml} width={size} height={size} />
         </View>
       )}
     </View>
@@ -81,5 +94,8 @@ const styles = StyleSheet.create({
   },
   glassesLayer: {
     zIndex: 3,
+  },
+  mouthLayer: {
+    zIndex: 4,
   },
 });

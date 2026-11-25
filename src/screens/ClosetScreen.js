@@ -5,13 +5,15 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {SvgXml} from 'react-native-svg';
 import AvatarView from '../components/AvatarView';
 import useUserStore from '../store/useUserStore';
-import {SHOP_ITEMS} from '../data/shopItems';
+import {SHOP_ITEMS, AVATAR_BG_COLORS} from '../data/shopItems';
 import {ACCESSORY_SVGS} from '../assets/mascota/accessories';
 import {colors, radius} from '../theme';
 
 const TABS = [
-  {key: 'hat', label: 'Sombreros'},
-  {key: 'glasses', label: 'Lentes'},
+  {key: 'hat', label: 'Cabeza'},
+  {key: 'glasses', label: 'Ojos'},
+  {key: 'mouth', label: 'Boca'},
+  {key: 'bg', label: 'Fondo'},
 ];
 
 export default function ClosetScreen() {
@@ -21,6 +23,7 @@ export default function ClosetScreen() {
   const equippedHat = useUserStore(s => s.equippedHat);
   const equippedGlasses = useUserStore(s => s.equippedGlasses);
   const purchaseOrToggle = useUserStore(s => s.purchaseOrToggle);
+  const setAvatarBgColor = useUserStore(s => s.setAvatarBgColor);
   const [tab, setTab] = useState('hat');
 
   const onPressItem = item => {
@@ -30,22 +33,25 @@ export default function ClosetScreen() {
       purchaseOrToggle(item); // equipa / desequipa
       return;
     }
-    // No comprado: verificar points >= price
     if (points < item.price) {
       Alert.alert('Puntos insuficientes', `Te faltan ${item.price - points} puntos para "${item.name}".`);
       return;
     }
     Alert.alert('Comprar', `¿Comprar "${item.name}" por ${item.price} puntos?`, [
       {text: 'Cancelar', style: 'cancel'},
-      {text: 'Comprar', onPress: () => purchaseOrToggle(item)}, // descuenta, desbloquea y equipa
+      {text: 'Comprar', onPress: () => purchaseOrToggle(item)},
     ]);
   };
 
-  const data = SHOP_ITEMS.filter(i => i.category === tab);
+  const data = tab === 'bg' ? AVATAR_BG_COLORS : SHOP_ITEMS.filter(i => i.category === tab);
+  const currentBg = equipped?.bg || 'transparent';
 
-  const renderItem = ({item}) => {
+  const renderAccessoryItem = ({item}) => {
     const owned = unlockedItems.includes(item.id);
-    const isEquipped = equipped[item.category] === item.id || equippedHat === item.id || equippedGlasses === item.id;
+    const isEquipped =
+      equipped[item.category] === item.id ||
+      (item.category === 'hat' && equippedHat === item.id) ||
+      (item.category === 'glasses' && equippedGlasses === item.id);
     const svgXml = item.svgXml || ACCESSORY_SVGS[item.id];
 
     return (
@@ -71,6 +77,40 @@ export default function ClosetScreen() {
     );
   };
 
+  const renderColorItem = ({item}) => {
+    const isSelected = currentBg === item.hex;
+    const isTransparent = item.hex === 'transparent';
+
+    return (
+      <Pressable
+        style={[styles.item, isSelected && styles.itemOn]}
+        onPress={() => setAvatarBgColor(item.hex)}>
+        <View
+          style={[
+            styles.colorCircle,
+            {
+              backgroundColor: isTransparent ? colors.cardAlt : item.hex,
+              borderColor: isSelected ? colors.success : colors.border,
+            },
+          ]}>
+          {isSelected ? (
+            <Icon
+              name="check"
+              size={28}
+              color={isTransparent ? colors.success : '#FFFFFF'}
+            />
+          ) : isTransparent ? (
+            <Icon name="cancel" size={24} color={colors.muted} />
+          ) : null}
+        </View>
+        <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
+        <Text style={[styles.tag, {color: isSelected ? colors.success : colors.muted}]}>
+          {isSelected ? 'Activo' : 'Gratis'}
+        </Text>
+      </Pressable>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
@@ -86,18 +126,26 @@ export default function ClosetScreen() {
       </View>
 
       <View style={styles.tabs}>
-        {TABS.map(t => (
-          <Pressable key={t.key} onPress={() => setTab(t.key)} style={[styles.tab, tab === t.key && styles.tabOn]}>
+        {TABS.map((t, idx) => (
+          <Pressable
+            key={t.key}
+            onPress={() => setTab(t.key)}
+            style={[
+              styles.tab,
+              idx === TABS.length - 1 && {marginRight: 0},
+              tab === t.key && styles.tabOn,
+            ]}>
             <Text style={[styles.tabText, tab === t.key && {color: '#1A1200'}]}>{t.label}</Text>
           </Pressable>
         ))}
       </View>
 
       <FlatList
+        key={tab}
         data={data}
         numColumns={3}
         keyExtractor={i => i.id}
-        renderItem={renderItem}
+        renderItem={tab === 'bg' ? renderColorItem : renderAccessoryItem}
         initialNumToRender={12}
         maxToRenderPerBatch={12}
         windowSize={7}
@@ -114,11 +162,11 @@ const styles = StyleSheet.create({
   title: {color: colors.text, fontSize: 24, fontWeight: '800'},
   points: {flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20},
   pointsText: {color: colors.text, fontWeight: '700'},
-  avatarBox: {alignItems: 'center', backgroundColor: colors.card, marginHorizontal: 16, borderRadius: radius.lg, paddingVertical: 8},
-  tabs: {flexDirection: 'row', marginHorizontal: 16, marginTop: 16},
-  tab: {flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: colors.card, borderRadius: radius.md, marginRight: 8},
+  avatarBox: {alignItems: 'center', backgroundColor: colors.card, marginHorizontal: 16, borderRadius: radius.lg, paddingVertical: 10},
+  tabs: {flexDirection: 'row', marginHorizontal: 16, marginTop: 14},
+  tab: {flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: colors.card, borderRadius: radius.md, marginRight: 6},
   tabOn: {backgroundColor: colors.accent},
-  tabText: {color: colors.text, fontWeight: '700'},
+  tabText: {color: colors.text, fontWeight: '700', fontSize: 13},
   item: {
     width: '31%', margin: '1.1%', backgroundColor: colors.card, borderRadius: radius.md, padding: 8,
     alignItems: 'center', borderWidth: 1, borderColor: colors.border,
@@ -127,6 +175,10 @@ const styles = StyleSheet.create({
   itemImgBox: {
     width: 70, height: 70, backgroundColor: colors.cardAlt, borderRadius: radius.sm,
     alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+  },
+  colorCircle: {
+    width: 56, height: 56, borderRadius: 28, borderWidth: 2,
+    alignItems: 'center', justifyContent: 'center', marginVertical: 7,
   },
   itemName: {color: colors.text, fontSize: 11, fontWeight: '600', marginTop: 6, textAlign: 'center'},
   tag: {fontSize: 12, fontWeight: '700', marginTop: 2},

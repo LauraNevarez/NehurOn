@@ -274,6 +274,17 @@ const useUserStore = create(
         return {ok: true, bought: !owned, equipped: !isCurrentlyEquipped};
       },
 
+      setAvatarBgColor: hexColor => {
+        const s = get();
+        const currentEquipped = s.equipped || {};
+        const newEquipped = {
+          ...currentEquipped,
+          bg: hexColor === 'transparent' ? null : hexColor,
+        };
+        set({equipped: newEquipped});
+        syncWithBackend(get());
+      },
+
       resetAll: () => set({...initialState}),
     }),
     {
