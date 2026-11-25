@@ -121,7 +121,11 @@ export default function ClosetScreen() {
         </View>
       </View>
 
-      <View style={styles.avatarBox}>
+      <View
+        style={[
+          styles.avatarBox,
+          currentBg && currentBg !== 'transparent' && {backgroundColor: currentBg},
+        ]}>
         <AvatarView size={230} equipped={equipped} hatId={equippedHat} glassesId={equippedGlasses} />
       </View>
 

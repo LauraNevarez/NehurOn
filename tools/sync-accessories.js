@@ -14,6 +14,7 @@ const fs = require('fs');
 const path = require('path');
 
 const BASE_DIR = path.resolve(__dirname, '../src/assets/mascota/accessories');
+const BASE_FERRET_SVG_FILE = path.resolve(__dirname, '../src/assets/mascota/base_nehuron.svg');
 const OUT_FILE = path.join(BASE_DIR, 'index.js');
 
 const FOLDERS = [
@@ -83,11 +84,21 @@ function run() {
     }
   }
 
+  // Leer base_nehuron.svg y quitar la capa de fondo sólido (Layer_4) para que sea transparente
+  let baseFerretXml = '';
+  if (fs.existsSync(BASE_FERRET_SVG_FILE)) {
+    baseFerretXml = fs
+      .readFileSync(BASE_FERRET_SVG_FILE, 'utf8')
+      .replace(/<g[^>]*id=["']Layer_4["'][^>]*>[\s\S]*?<\/g>/i, '');
+  }
+
   const output = `/**
  * ARCHIVO AUTO-GENERADO por tools/sync-accessories.js
- * No edites manualmente: agrega tus .svg en Cabeza/, Ojos/ o Boca/
- * y ejecuta "npm run sync-accessories".
+ * No edites manualmente: modifica base_nehuron.svg o agrega tus .svg
+ * en Cabeza/, Ojos/ o Boca/ y ejecuta "npm run sync-accessories".
  */
+
+export const BASE_NEHURON_SVG = ${JSON.stringify(baseFerretXml)};
 
 export const ACCESSORY_SVGS = ${JSON.stringify(svgs, null, 2)};
 
@@ -97,7 +108,7 @@ export default ACCESSORY_SVGS;
 `;
 
   fs.writeFileSync(OUT_FILE, output, 'utf8');
-  console.log(`✅ Sincronizados ${catalog.length} accesorios en ${OUT_FILE}:`);
+  console.log(`✅ Sincronizado base_nehuron.svg + ${catalog.length} accesorios en ${OUT_FILE}:`);
   for (const {folder, category} of FOLDERS) {
     const count = catalog.filter(c => c.category === category).length;
     console.log(`   - ${folder} (${category}): ${count} accesorios`);

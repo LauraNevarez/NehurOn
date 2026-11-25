@@ -6,8 +6,8 @@ import {ACCESSORY_SVGS} from '../assets/mascota/accessories';
 
 /**
  * Componente visual de la mascota NehurOn:
- * Renderiza la base del hurón en SVG (con color de fondo personalizable) y
- * superpone dinámicamente las capas vectoriales de Cabeza, Ojos y Boca.
+ * Renderiza la base del hurón (base_nehuron.svg) y superpone dinámicamente
+ * las capas vectoriales de Cabeza, Ojos y Boca.
  */
 export default function AvatarView({
   size = 220,
@@ -15,20 +15,16 @@ export default function AvatarView({
   hatId,
   glassesId,
   mouthId,
-  bgColor,
   showBackground = false,
   style,
 }) {
   const effectiveHat = equipped?.hat || equipped?.head || hatId || null;
   const effectiveGlasses = equipped?.glasses || equipped?.eyes || glassesId || null;
   const effectiveMouth = equipped?.mouth || equipped?.boca || mouthId || null;
-  const effectiveBg = bgColor || equipped?.bg || (showBackground ? '#F9BA51' : 'transparent');
 
   const hatXml = effectiveHat ? ACCESSORY_SVGS[effectiveHat] : null;
   const glassesXml = effectiveGlasses ? ACCESSORY_SVGS[effectiveGlasses] : null;
   const mouthXml = effectiveMouth ? ACCESSORY_SVGS[effectiveMouth] : null;
-
-  const hasCustomBg = effectiveBg && effectiveBg !== 'transparent' && effectiveBg !== 'none';
 
   return (
     <View
@@ -38,17 +34,13 @@ export default function AvatarView({
           height: size,
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: hasCustomBg ? Math.round(size * 0.14) : 0,
-          overflow: 'hidden',
-          backgroundColor: hasCustomBg ? effectiveBg : 'transparent',
         },
         style,
       ]}>
-      {/* Capa 1: Base Hurón NehurOn SVG */}
+      {/* Capa 1: Base Hurón NehurOn (base_nehuron.svg) */}
       <NehurOnSvg
         size={size}
-        showBackground={false}
-        backgroundColor="transparent"
+        showBackground={showBackground}
         style={styles.baseSvg}
       />
 

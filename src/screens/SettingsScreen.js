@@ -76,7 +76,11 @@ export default function SettingsScreen({navigation}) {
 
         <Text style={styles.section}>Perfil</Text>
         <View style={styles.profileCard}>
-          <View style={styles.avatarWrapper}>
+          <View
+            style={[
+              styles.avatarWrapper,
+              equipped?.bg && equipped.bg !== 'transparent' && {backgroundColor: equipped.bg},
+            ]}>
             <AvatarView size={95} equipped={equipped} hatId={equippedHat} glassesId={equippedGlasses} />
           </View>
           <View style={styles.profileInfo}>

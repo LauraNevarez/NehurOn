@@ -406,9 +406,8 @@ export default function LoginScreen({navigation}) {
             <Pressable
               style={styles.localChip}
               onPress={() => enterLocalMode()}>
-              <Icon name="lightning-bolt" size={18} color="#FF7A2F" />
               <Text style={styles.localChipText}>
-                ⚡ Probar app de inmediato (Modo Local)
+                Probar app de inmediato (Modo Local)
               </Text>
             </Pressable>
 
