@@ -28,14 +28,14 @@ export default function AppNavigator() {
   const hasOnboarded = useUserStore(s => s.hasOnboarded);
 
   // Determinación de la pantalla inicial:
-  // 1. Si no está autenticado -> 'Login' (Login First)
-  // 2. Si ya está autenticado pero no completó onboarding -> 'Onboarding' o 'Permissions'
-  // 3. Si ya está autenticado y listo -> 'Main' (Dashboard principal)
-  const initialRoute = !isAuthenticated
+  // 1. Si es la primera vez que abre la app (!hasOnboarded) -> 'Onboarding'
+  // 2. Si ya vio el onboarding pero no ha iniciado sesión -> 'Login'
+  // 3. Si ya está autenticado -> 'Main' (Dashboard principal)
+  const initialRoute = !hasOnboarded
+    ? 'Onboarding'
+    : !isAuthenticated
     ? 'Login'
-    : hasOnboarded
-    ? 'Main'
-    : 'Permissions';
+    : 'Main';
 
   return (
     <NavigationContainer theme={navTheme}>

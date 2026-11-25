@@ -30,7 +30,7 @@ const initialState = {
   // Flujo de autenticación con MongoDB Atlas
   isAuthenticated: false,
   userEmail: null,
-  hasOnboarded: true,
+  hasOnboarded: false,
   userName: 'Explorador',
   userAge: null,
   points: 100,

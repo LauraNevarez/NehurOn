@@ -16,12 +16,19 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import NehurOnSvg from '../components/NehurOnSvg';
 import CustomButton from '../components/CustomButton';
 import useUserStore from '../store/useUserStore';
+import BlockerNative from '../modules/BlockerNativeModule';
 import {apiLogin, apiRegister} from '../services/api';
 import {colors, radius} from '../theme';
 
 export default function LoginScreen({navigation}) {
+  const storedName = useUserStore(s => s.userName);
+  const initialName =
+    storedName && storedName !== 'Explorador' && storedName !== 'Amigo'
+      ? storedName
+      : '';
+
   const [isRegisterMode, setIsRegisterMode] = useState(false);
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState(initialName);
   const [age, setAge] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,7 +37,20 @@ export default function LoginScreen({navigation}) {
   const [loading, setLoading] = useState(false);
 
   const loginSuccess = useUserStore(s => s.loginSuccess);
-  const hasOnboarded = useUserStore(s => s.hasOnboarded);
+
+  // Después de iniciar sesión o registrarse, enviar a activar permisos si aún no están listos
+  const navigateAfterAuth = async () => {
+    try {
+      const hasPerms = await BlockerNative.hasAllPermissions();
+      if (hasPerms) {
+        navigation.replace('Main');
+      } else {
+        navigation.replace('Permissions');
+      }
+    } catch (_e) {
+      navigation.replace('Permissions');
+    }
+  };
 
   // Acceso inmediato en Modo Local para probar la app sin depender del servidor
   const enterLocalMode = (customEmail = null, customName = null, customAge = null) => {
@@ -49,11 +69,7 @@ export default function LoginScreen({navigation}) {
       equippedHat: 'hat_gorra',
       equippedGlasses: 'gl_pixel',
     });
-    if (hasOnboarded) {
-      navigation.replace('Main');
-    } else {
-      navigation.replace('Permissions');
-    }
+    navigateAfterAuth();
   };
 
   // Acción: Iniciar Sesión
@@ -71,11 +87,7 @@ export default function LoginScreen({navigation}) {
 
       if (res.ok && res.data?.user) {
         loginSuccess(res.data.user);
-        if (hasOnboarded) {
-          navigation.replace('Main');
-        } else {
-          navigation.replace('Permissions');
-        }
+        await navigateAfterAuth();
       } else {
         Alert.alert(
           'Servidor no disponible',
@@ -155,13 +167,7 @@ export default function LoginScreen({navigation}) {
           [
             {
               text: 'Comenzar',
-              onPress: () => {
-                if (hasOnboarded) {
-                  navigation.replace('Main');
-                } else {
-                  navigation.replace('Permissions');
-                }
-              },
+              onPress: () => navigateAfterAuth(),
             },
           ]
         );

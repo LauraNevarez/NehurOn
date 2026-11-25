@@ -24,7 +24,7 @@ export default function OnboardingScreen({navigation}) {
     if (!isLast) return setStep(step + 1);
     setUserName(name.trim() || 'Amigo');
     completeOnboarding();
-    navigation.replace('Permissions');
+    navigation.replace('Login');
   };
 
   return (

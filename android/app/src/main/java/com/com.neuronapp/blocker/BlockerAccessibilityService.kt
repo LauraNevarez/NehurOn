@@ -118,17 +118,12 @@ class BlockerAccessibilityService : AccessibilityService() {
                 setBackgroundColor(Color.parseColor("#F20F1020"))
                 setPadding((32 * dp).toInt(), 0, (32 * dp).toInt(), 0)
             }
-            val logoSize = (124 * dp).toInt()
+            val logoSize = (150 * dp).toInt()
             val logoView = ImageView(this).apply {
-                setImageResource(R.mipmap.ic_launcher_round)
-                scaleType = ImageView.ScaleType.CENTER_CROP
-                background = GradientDrawable().apply {
-                    shape = GradientDrawable.OVAL
-                    setColor(Color.parseColor("#F5B041"))
-                }
-                clipToOutline = true
+                setImageResource(R.drawable.nehuron_overlay_logo)
+                scaleType = ImageView.ScaleType.FIT_CENTER
                 layoutParams = LinearLayout.LayoutParams(logoSize, logoSize).apply {
-                    bottomMargin = (20 * dp).toInt()
+                    bottomMargin = (16 * dp).toInt()
                 }
             }
             root.addView(logoView)
